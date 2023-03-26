@@ -36,7 +36,7 @@ function handles = Animator(A)
 end
 
 function [A, handles] = heapify(A, n, i, handles)
-    l = 2*i;
+    l = 2*i; 
     r = 2*i+1;
 
     if(l < n && A(i) < A(l))
