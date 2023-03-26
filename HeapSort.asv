@@ -12,13 +12,18 @@ function A = HeapSort(A, animate)
         [A, handles] = swap(A, i, 1, handles);
         [A, handles] = heapify(A, i, 1, handles);
     end
+
+    
 end
 
 function handles = Animator(A)
     figure('Color', 'w'); hold on;
     recx = [-0.5,-0.5,0.5,0.5]; recy = [0,1,1,0];
     lo = 1; hi = numel(A);
-    handles = arrayfun(@(i)fill(recx+i, A(i)*recy, 'm'), lo:hi);
+    for i = lo:hi
+        h = fill(recx+i, A(i)*recy, 'm');
+        handles = [handles, h];
+    end
     axis tight; axis off; delay = 3;
     txt = text(mean(xlim), mean(ylim), num2str(delay), ...
         'FontSize', 200,'Interpreter','latex', ...
@@ -36,6 +41,7 @@ function handles = Animator(A)
 end
 
 function [A, handles] = heapify(A, n, i, handles)
+    
     l = 2*i;
     r = 2*i+1;
 
@@ -62,7 +68,7 @@ function [A, handles] = swap(A, i, j, handles)
         handles(j).FaceColor = 'g';
         recx = [-0.5,-0.5,0.5,0.5];
         ai = recx+double(i); bj = recx+double(j);
-        for f = 0:0.2:1
+        for f = 0:0.1:1
             h = handles(i); h.XData = ai + f*(bj - ai);
             h = handles(j); h.XData = bj + f*(ai - bj);
             drawnow; 
