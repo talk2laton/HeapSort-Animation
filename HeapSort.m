@@ -1,77 +1,74 @@
-function A = HeapSort(A, delay)
-    close all; handles = []; 
+function A = HeapSort(A, animate)
+    close all;  n = numel(A); handles = [];
+    if(animate)
+        handles = Animator(A);
+    end
+    
+    for i = floor(n/2):-1:1
+        [A, handles] = heapify(A, n, i, handles);
+    end
+
+    for i = n:-1:1
+        [A, handles] = swap(A, i, 1, handles);
+        [A, handles] = heapify(A, i, 1, handles);
+    end
+end
+
+function handles = Animator(A)
     figure('Color', 'w'); hold on;
     recx = [-0.5,-0.5,0.5,0.5]; recy = [0,1,1,0];
     lo = 1; hi = numel(A);
-    for i = lo:hi
-        h = fill(recx+i, A(i)*recy, 'm');
-        handles = [handles, h];
-    end
-    axis tight; axis off;
-    if(delay>0)
-        txt = text(mean(xlim), mean(ylim), num2str(delay), ...
-            'FontSize', 200,'Interpreter','latex', ...
-            'HorizontalAlignment', 'center');
-        while(delay >= 0)
-            if(delay>0)
-                pause(1); 
-            else
-                pause(0.05);
-            end
-            delay = delay - 1;
-            txt.String = num2str(delay);
+    handles = arrayfun(@(i)fill(recx+i, A(i)*recy, 'm'), lo:hi);
+    axis tight; axis off; delay = 3;
+    txt = text(mean(xlim), mean(ylim), num2str(delay), ...
+        'FontSize', 200,'Interpreter','latex', ...
+        'HorizontalAlignment', 'center');
+    while(delay >= 0)
+        if(delay>0)
+            pause(1); 
+        else
+            pause(0.05);
         end
-        txt.String = "";
+        delay = delay - 1;
+        txt.String = num2str(delay);
     end
-    
-    for i = lo:hi
-        j = i; parent = int8(max(1, floor(j/2)));
-        while(A(j) > A(parent))
-            [A, handles] = swap(A, j, parent, handles);
-            j = parent; parent = int8(floor(j/2));
-        end
+    txt.String = "";
+end
+
+function [A, handles] = heapify(A, n, i, handles)
+    l = 2*i;
+    r = 2*i+1;
+
+    if(l < n && A(i) < A(l))
+        largest = l;
+    else
+        largest = i;
     end
 
-    for k = hi:-1:1
-        j = 1; 
-        [A, handles] = swap(A, j, k, handles);
-        leftchild = 2; rightchild = 3;
-        left = A(leftchild); right = A(rightchild);
-        while(A(j) < max(left, right) && rightchild < k)
-            if(left > right)
-                [A, handles] = swap(A, j, leftchild, handles); 
-                j = leftchild; 
-            else
-                [A, handles] = swap(A, j, rightchild, handles); 
-                j = rightchild;
-            end
-            leftchild = 2 * j; rightchild = 2 * j + 1;
-            disp([left, right])
-            left = A(j); 
-            right = A(j);
-            if(leftchild < k) 
-                left = A(leftchild);
-            end
-            if(rightchild < k) 
-                right = A(rightchild);
-            end
-            disp([left, right])
-            disp("==================================")
-        end
+    if(r < n && A(largest) < A(r))
+        largest = r;
+    end
+
+    if largest ~= i
+        [A, handles] = swap(A, i, largest, handles);
+        [A, handles] = heapify(A, n, largest, handles);
     end
 end
 
 function [A, handles] = swap(A, i, j, handles)
-    handles(i).FaceColor = 'r';
-    handles(j).FaceColor = 'g';
-    recx = [-0.5,-0.5,0.5,0.5];
-    temp = A(i); A(i) = A(j); A(j) = temp;
-    ai = recx+(i*1.0); bj = recx+(j*1.0);
-    for f = 0:0.02:1
-        h = handles(i); h.XData = ai + f*(bj - ai);
-        h = handles(j); h.XData = bj + f*(ai - bj);
-        drawnow; 
+    A([i,j]) = A([j,i]); 
+    if(~isempty(handles))
+        handles(i).FaceColor = 'r';
+        handles(j).FaceColor = 'g';
+        recx = [-0.5,-0.5,0.5,0.5];
+        ai = recx+double(i); bj = recx+double(j);
+        for f = 0:0.2:1
+            h = handles(i); h.XData = ai + f*(bj - ai);
+            h = handles(j); h.XData = bj + f*(ai - bj);
+            drawnow; 
+        end
+        handles([i, j]) = handles([j, i]);
+        handles(i).FaceColor = 'b'; 
+        handles(j).FaceColor = 'b';
     end
-    temp = handles(i); handles(i) = handles(j); handles(j) = temp;
-    handles(i).FaceColor = 'b'; handles(j).FaceColor = 'b';
 end
